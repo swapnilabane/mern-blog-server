@@ -1,12 +1,40 @@
 import { userModel } from '../models/userModel.js';
 import { postModel } from '../models/postModel.js';
+import axios from 'axios';
 
 const createPost = async (req, res) => {
   try {
-    const newPost = await postModel.create(req.body);
+    const image = req.body.image;
+
+    const signatureResponse = await axios.post(
+      'https://mern-blog-server-hq7r.onrender.com/api/sign-upload',
+      { folder: 'images' }
+    );
+
+    const { timestamp, signature } = signatureResponse.data;
+
+    const cloudinaryResponse = await axios.post(
+      'https://api.cloudinary.com/v1_1/dn1d2qvqd/image/upload',
+      {
+        file: image,
+        timestamp,
+        signature,
+        api_key: process.env.CLOUDINARY_API_KEY,
+        upload_preset: 'images_preset',
+        folder: 'images',
+      }
+    );
+
+    const imageUrl = cloudinaryResponse.data.secure_url;
+
+    const newPost = await postModel.create({
+      ...req.body,
+      photo: imageUrl,
+    });
+
     res.json(newPost);
   } catch (error) {
-    throw new Error(error);
+    res.status(500).json({ error: 'Error creating post' });
   }
 };
 

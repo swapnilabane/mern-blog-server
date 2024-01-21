@@ -20,7 +20,6 @@ const generateSignature = (req, res, next) => {
   try {
     const timestamp = Math.round(new Date().getTime() / 1000);
 
-    // Determine the upload preset based on the folder
     const uploadPreset =
       folder === 'images'
         ? process.env.CLOUDINARY_IMAGES_UPLOAD_PRESET
@@ -33,7 +32,6 @@ const generateSignature = (req, res, next) => {
       return next(new Error('Invalid folder specified'));
     }
 
-    // Include the upload preset in the parameters
     const signature = cloudinary.utils.api_sign_request(
       {
         timestamp,
