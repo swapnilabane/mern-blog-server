@@ -14,6 +14,9 @@ import multer from 'multer';
 dotenv.config();
 
 const app = express();
+const port = process.env.PORT || 8000;
+const mongoURL = process.env.MONGO_URL;
+
 app.use(
   cors({
     origin: [
@@ -25,9 +28,6 @@ app.use(
   })
 );
 app.use(express.json());
-
-const port = process.env.PORT || '8000';
-const mongoURL = process.env.MONGO_URL;
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
