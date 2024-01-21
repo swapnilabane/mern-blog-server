@@ -26,8 +26,14 @@ const createPost = async (req, res) => {
     res.json(newPost);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Error creating post' });
+    res
+      .status(500)
+      .json({ error: 'Error creating post', details: error.message });
   }
+  console.log('Signature:', signature);
+  console.log('Timestamp:', timestamp);
+  console.log('req.file:', req.file);
+  console.log('Cloudinary Response:', cloudinaryResponse.data);
 };
 
 const updatePost = async (req, res) => {
