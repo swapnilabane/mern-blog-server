@@ -17,7 +17,7 @@ app.use(
   cors({
     origin: [
       'http://localhost:5173',
-      'https://venerable-marzipan-db7c5a.netlify.app',
+      'https://golden-pastelito-390045.netlify.app',
     ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
