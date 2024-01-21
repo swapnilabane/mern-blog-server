@@ -12,7 +12,14 @@ import { fileURLToPath } from 'url';
 import cors from 'cors';
 
 const app = express();
-app.use(cors());
+app.use(
+  cors({
+    origin: 'https://vermillion-mousse-939c04.netlify.app',
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    credentials: true,
+  })
+);
+
 app.use(express.json());
 
 const __filename = fileURLToPath(import.meta.url);
