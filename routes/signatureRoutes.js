@@ -1,5 +1,8 @@
 import express from 'express';
-import { generateSignature } from '../controllers/signatureController.js';
+import {
+  generateSignature,
+  handleFileUpload,
+} from '../controllers/signatureController.js';
 
 const signatureRouter = express.Router();
 
