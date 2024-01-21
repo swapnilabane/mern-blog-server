@@ -2,10 +2,6 @@ import { userModel } from '../models/userModel.js';
 import { postModel } from '../models/postModel.js';
 import axios from 'axios';
 
-import { userModel } from '../models/userModel.js';
-import { postModel } from '../models/postModel.js';
-import axios from 'axios';
-
 const createPost = async (req, res) => {
   try {
     const signResponse = await axios.get(
