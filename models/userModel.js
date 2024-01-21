@@ -23,9 +23,9 @@ var UserSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    profilePic: {
+    profilePicUrl: {
       type: String,
-      default: 'avtar.jpg',
+      default: null,
     },
   },
   {
