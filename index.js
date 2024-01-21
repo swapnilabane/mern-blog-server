@@ -21,7 +21,7 @@ app.use(
   cors({
     origin: [
       'http://localhost:5173',
-      'https://creative-crisp-7add63.netlify.app',
+      'https://venerable-marzipan-db7c5a.netlify.app',
     ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
