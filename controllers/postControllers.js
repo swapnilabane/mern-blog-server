@@ -13,32 +13,30 @@ const createPost = async (req, res) => {
 
     const { timestamp, signature } = signatureResponse.data;
 
-    console.log('Signature Response:', signatureResponse.data);
-
-    const formData = new FormData();
-    formData.append('file', image); // Assuming `image` is the file data
-    formData.append('timestamp', timestamp);
-    formData.append('signature', signature);
-    formData.append('api_key', process.env.CLOUDINARY_API_KEY);
-    formData.append('upload_preset', 'images_preset');
-    formData.append('folder', 'images');
-
     const cloudinaryResponse = await axios.post(
       'https://api.cloudinary.com/v1_1/dn1d2qvqd/image/upload',
-      formData,
       {
-        headers: {
-          ...formData.getHeaders(),
-        },
+        file: image,
+        timestamp,
+        signature,
+        api_key: process.env.CLOUDINARY_API_KEY,
+        upload_preset: 'images_preset',
+        folder: 'images',
       }
     );
 
-    console.log('Cloudinary Response:', cloudinaryResponse.data);
+    const imageUrl = cloudinaryResponse.data.secure_url;
 
-    // Handle the response as needed
-    res.status(200).json({ success: true, data: cloudinaryResponse.data });
+    const newPostData = {
+      ...req.body,
+      photo: imageUrl,
+    };
+
+    const newPost = await postModel.create(newPostData);
+
+    res.json(newPost);
   } catch (error) {
-    console.error('Error creating post:', error.message);
+    console.error('Error creating post:', error);
     res.status(500).json({ error: 'Error creating post' });
   }
 };
