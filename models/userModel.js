@@ -24,8 +24,11 @@ var UserSchema = new mongoose.Schema(
       required: true,
     },
     profilePic: {
-      type: String,
-      default: 'avtar.jpg',
+      type: Object,
+      default: {
+        url: 'avtar.jpg',
+        public_id: null,
+      },
     },
   },
   {

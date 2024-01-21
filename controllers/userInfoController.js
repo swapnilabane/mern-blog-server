@@ -1,7 +1,6 @@
 import { userModel } from '../models/userModel.js';
 import { postModel } from '../models/postModel.js';
 import bcrypt from 'bcrypt';
-import axios from 'axios';
 
 const getSingleUser = async (req, res) => {
   const { id } = req.params;
@@ -14,53 +13,65 @@ const getSingleUser = async (req, res) => {
 };
 
 const updateUser = async (req, res) => {
-  if (req.body.userId === req.params.id) {
+  try {
+    if (req.body.userId !== req.params.id) {
+      return res
+        .status(401)
+        .json({ message: 'You can update only your account' });
+    }
+
+    // Hash the password if provided
     if (req.body.password) {
       const salt = await bcrypt.genSalt(10);
       req.body.password = await bcrypt.hash(req.body.password, salt);
     }
 
-    try {
-      if (req.file) {
-        const signResponse = await axios.post(
-          'https://mern-blog-server-hq7r.onrender.com/api/sign-upload',
-          { folder: 'profile-pictures' }
-        );
+    // Check if a file is provided for profile picture update
+    if (req.file) {
+      const image = req.file.buffer; // Directly accessing file content
 
-        const { timestamp, signature } = signResponse.data;
+      // Fetch Cloudinary signature
+      const signatureResponse = await axios.post(
+        'https://mern-blog-server-hq7r.onrender.com/api/sign-upload',
+        { folder: 'profile-pics' }
+      );
 
-        const formData = new FormData();
-        formData.append('file', req.file.buffer);
-        formData.append('timestamp', timestamp);
-        formData.append('signature', signature);
-        formData.append('api_key', process.env.CLOUDINARY_API_KEY);
-        formData.append('upload_preset', 'images_preset');
-        formData.append('folder', 'profile-pictures');
+      const { timestamp, signature } = signatureResponse.data;
 
-        const cloudinaryResponse = await axios.post(
-          'https://api.cloudinary.com/v1_1/dn1d2qvqd/image/upload',
-          formData,
-          {
-            headers: {
-              'Content-Type': 'multipart/form-data',
-              ...formData.getHeaders(),
-            },
-          }
-        );
+      const formData = new FormData();
+      formData.append('file', image, { filename: 'profile-pic.jpg' });
+      formData.append('timestamp', timestamp);
+      formData.append('signature', signature);
+      formData.append('api_key', process.env.CLOUDINARY_API_KEY);
+      formData.append('upload_preset', 'profile-pics-preset');
+      formData.append('folder', 'profile-pics');
 
-        req.body.profilePicture = cloudinaryResponse.data.secure_url;
-      }
+      // Upload to Cloudinary
+      const cloudinaryResponse = await axios.post(
+        'https://api.cloudinary.com/v1_1/dn1d2qvqd/image/upload',
+        formData,
+        {
+          headers: {
+            ...formData.getHeaders(),
+          },
+        }
+      );
 
-      const updatedUser = await userModel.findByIdAndUpdate(req.params.id, {
-        $set: req.body,
-      });
-
-      res.json(updatedUser);
-    } catch (error) {
-      res.status(500).json(error);
+      req.body.profilePic = cloudinaryResponse.data.secure_url;
     }
-  } else {
-    res.status(401).json({ message: 'You can update only your account' });
+
+    // Use findByIdAndUpdate to get the updated user data
+    const updatedUser = await userModel.findByIdAndUpdate(
+      req.params.id,
+      { $set: req.body },
+      { new: true } // Return the updated document
+    );
+
+    // Send back the updated user data, including profilePic
+    res.json(updatedUser);
+  } catch (error) {
+    console.error('Error updating user:', error.message);
+    res.status(500).json({ message: 'Internal Server Error' });
   }
 };
 
@@ -68,19 +79,8 @@ const deleteUser = async (req, res) => {
   if (req.body.userId === req.params.id) {
     try {
       const user = await userModel.findById(req.params.id);
-
       try {
-        // Delete posts of the user
         await postModel.deleteMany({ username: user.username });
-
-        // Delete the user's profile picture from Cloudinary
-        if (user.profilePicture) {
-          const publicId = user.profilePicture.split('/').pop().split('.')[0];
-          await axios.delete(
-            `https://mern-blog-server-hq7r.onrender.com/api/upload/${publicId}`
-          );
-        }
-
         await userModel.findByIdAndDelete(req.params.id);
         res.status(200).json('User has been deleted...');
       } catch (err) {
