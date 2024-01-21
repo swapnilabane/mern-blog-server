@@ -2,6 +2,10 @@ import { userModel } from '../models/userModel.js';
 import { postModel } from '../models/postModel.js';
 import axios from 'axios';
 
+import { userModel } from '../models/userModel.js';
+import { postModel } from '../models/postModel.js';
+import axios from 'axios';
+
 const createPost = async (req, res) => {
   try {
     const signResponse = await axios.get(
@@ -24,16 +28,17 @@ const createPost = async (req, res) => {
     });
 
     res.json(newPost);
+
+    console.log('Signature:', signature);
+    console.log('Timestamp:', timestamp);
+    console.log('req.file:', req.file);
+    console.log('Cloudinary Response:', cloudinaryResponse.data);
   } catch (error) {
     console.error(error);
     res
       .status(500)
       .json({ error: 'Error creating post', details: error.message });
   }
-  console.log('Signature:', signature);
-  console.log('Timestamp:', timestamp);
-  console.log('req.file:', req.file);
-  console.log('Cloudinary Response:', cloudinaryResponse.data);
 };
 
 const updatePost = async (req, res) => {
