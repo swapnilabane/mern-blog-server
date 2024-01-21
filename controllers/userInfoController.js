@@ -22,20 +22,33 @@ const updateUser = async (req, res) => {
 
     try {
       if (req.file) {
-        const signResponse = await axios.get(
-          'https://mern-blog-server-hq7r.onrender.com/api/sign'
+        const signResponse = await axios.post(
+          'https://mern-blog-server-hq7r.onrender.com/api/sign-upload',
+          { folder: 'profile-pictures' }
         );
-        const { signature, timestamp } = signResponse.data;
+
+        const { timestamp, signature } = signResponse.data;
+
+        const formData = new FormData();
+        formData.append('file', req.file.buffer);
+        formData.append('timestamp', timestamp);
+        formData.append('signature', signature);
+        formData.append('api_key', process.env.CLOUDINARY_API_KEY);
+        formData.append('upload_preset', 'images_preset');
+        formData.append('folder', 'profile-pictures');
 
         const cloudinaryResponse = await axios.post(
-          'https://mern-blog-server-hq7r.onrender.com/api/upload',
+          'https://api.cloudinary.com/v1_1/dn1d2qvqd/image/upload',
+          formData,
           {
-            file: req.file.buffer,
-            timestamp,
-            signature,
+            headers: {
+              'Content-Type': 'multipart/form-data',
+              ...formData.getHeaders(),
+            },
           }
         );
-        req.body.profilePicture = cloudinaryResponse.data.url;
+
+        req.body.profilePicture = cloudinaryResponse.data.secure_url;
       }
 
       const updatedUser = await userModel.findByIdAndUpdate(req.params.id, {
