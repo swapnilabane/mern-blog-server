@@ -59,8 +59,16 @@ app.get('/api/sign', (req, res) => {
 
 app.post('/api/upload', upload.single('file'), async (req, res) => {
   try {
-    const result = await cloudinary.uploader.upload(req.file.buffer);
+    if (!req.file || !req.file.buffer) {
+      return res.status(400).json({ error: 'No file or buffer provided' });
+    }
+
+    const result = await cloudinary.uploader.upload(
+      req.file.buffer.toString('base64')
+    );
     const cloudinaryUrl = result.secure_url;
+
+    // Return the cloudinaryUrl in the response
     res.status(200).json({ url: cloudinaryUrl });
   } catch (error) {
     console.error('Error uploading to Cloudinary:', error.message);
