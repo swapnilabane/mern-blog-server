@@ -17,7 +17,7 @@ app.use(
   cors({
     origin: [
       'http://localhost:5173',
-      'https://golden-pastelito-390045.netlify.app',
+      'https://frolicking-blini-2310c6.netlify.app',
     ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
