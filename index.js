@@ -14,7 +14,7 @@ import cors from 'cors';
 const app = express();
 app.use(
   cors({
-    origin: 'https://vermillion-mousse-939c04.netlify.app',
+    origin: 'https://creative-crisp-7add63.netlify.app',
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
   })
