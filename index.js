@@ -1,4 +1,5 @@
 import dotenv from 'dotenv';
+dotenv.config();
 import express from 'express';
 import mongoose from 'mongoose';
 import { authRoute } from './routes/authRoutes.js';
@@ -8,10 +9,11 @@ import { categoryRoute } from './routes/categoryRoutes.js';
 import cloudinary from 'cloudinary';
 import cors from 'cors';
 
+import multer from 'multer';
+
 dotenv.config();
 
 const app = express();
-
 app.use(
   cors({
     origin: [
@@ -22,7 +24,6 @@ app.use(
     credentials: true,
   })
 );
-
 app.use(express.json());
 
 const port = process.env.PORT || '8000';
@@ -34,6 +35,9 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
+
 const connectDB = async () => {
   try {
     const conn = await mongoose.connect(mongoURL);
@@ -44,9 +48,18 @@ const connectDB = async () => {
   }
 };
 
-app.post('/api/upload', async (req, res) => {
+app.get('/api/sign', (req, res) => {
+  const timestamp = Math.round(new Date().getTime() / 1000);
+  const signature = cloudinary.utils.api_sign_request(
+    { timestamp },
+    process.env.CLOUDINARY_API_SECRET
+  );
+  res.json({ signature, timestamp });
+});
+
+app.post('/api/upload', upload.single('file'), async (req, res) => {
   try {
-    const result = await cloudinary.uploader.upload(req.file.path);
+    const result = await cloudinary.uploader.upload(req.file.buffer);
     const cloudinaryUrl = result.secure_url;
     res.status(200).json({ url: cloudinaryUrl });
   } catch (error) {
@@ -62,6 +75,8 @@ app.use('/api/v1/categories', categoryRoute);
 
 connectDB().then(() => {
   app.listen(port, () => {
-    console.log(`Listening for requests http://localhost:${port}`);
+    console.log(
+      `Listening for requests https://mern-blog-server-hq7r.onrender.com`
+    );
   });
 });

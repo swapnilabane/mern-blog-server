@@ -23,7 +23,7 @@ var UserSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    profilePicUrl: {
+    profilePicture: {
       type: String,
       default: null,
     },
